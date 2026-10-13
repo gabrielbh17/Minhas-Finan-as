@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -430,18 +430,25 @@ function setSyncStatus(s){
 }
 
 async function checkConnection(url){
-  if(!url){ setSyncNote('error','URL não configurada. Os dados ficam só neste navegador.'); return false; }
-  setSyncNote('amber','Testando conexão...');
+  if(!url){ syncFeedback('error','URL não configurada. Os dados ficam só neste navegador.'); return false; }
+  syncFeedback('amber','Testando conexão...');
   try{
     const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'get',usuario:'__ping__',chave:'__ping__'}),headers:{'Content-Type':'application/json'}});
     const d=await r.json();
-    if(d&&typeof d.ok!=='undefined'){ setSyncNote('green','Servidor conectado. Dados sincronizam entre dispositivos.'); return true; }
-    setSyncNote('error','Resposta inesperada. Verifique a URL.'); return false;
-  }catch(e){ setSyncNote('error','Sem conexão com o servidor. Verifique a URL do Apps Script.'); return false; }
+    if(d&&typeof d.ok!=='undefined'){ syncFeedback('green','✓ Servidor conectado! Dados sincronizam entre dispositivos.'); return true; }
+    syncFeedback('error','Resposta inesperada. Verifique a URL.'); return false;
+  }catch(e){ syncFeedback('error','Sem conexão. Verifique a URL do Apps Script.'); return false; }
 }
 function setSyncNote(color,msg){
   const n=$('#syncNote'); if(!n) return;
   n.innerHTML=`<span class="dot ${color}"></span>${msg}`;
+}
+// Mostra feedback tanto na tela de login quanto na tela de Ajustes
+function syncFeedback(color,msg){
+  setSyncNote(color,msg); // tela de login
+  // tela de Ajustes: usa o toast + atualiza badge de status
+  toast(msg);
+  setSyncStatus(color==='green'?'ok':color==='amber'?'syncing':'error');
 }
 
 /* ── Auth ── */
@@ -530,8 +537,23 @@ function fillSettings(){
 }
 function bindSettings(){
   const v=$('#v-cfg');
-  $('#btnSaveUrl').onclick=()=>{const u=$('#cfgScriptUrl').value.trim();setScriptUrl(u);checkConnection(u);toast('URL salva.');if(currentUser&&u)syncLoad(currentUser.usuario).then(()=>{render();fillSettings();});};
-  $('#btnTestUrl').onclick=()=>{checkConnection($('#cfgScriptUrl').value.trim());};
+  $('#btnSaveUrl').onclick=async()=>{
+    const u=$('#cfgScriptUrl').value.trim();
+    setScriptUrl(u);
+    const ok=await checkConnection(u);
+    if(ok&&currentUser){
+      // Sobe os dados locais para o Sheets imediatamente
+      await doSyncSave(currentUser.usuario);
+      toast('✓ URL salva e dados enviados ao Google Sheets!');
+    } else if(!ok){
+      toast('URL salva, mas sem conexão. Verifique a URL.');
+    }
+  };
+  $('#btnTestUrl').onclick=async()=>{
+    const u=$('#cfgScriptUrl').value.trim()||getScriptUrl();
+    if(!u){toast('Cole a URL primeiro.');return;}
+    await checkConnection(u);
+  };
   v.addEventListener('change',e=>{if(!currentUser||!currentUser.admin)return;const t=e.target;if(t.id==='cSaldo'){const n=num(t.value);if(!isNaN(n))cfg.saldoInicial=n;}else if(t.id==='cBase'){if(t.value)cfg.dataBase=t.value;}else if(t.id==='cTaxa'){const n=num(t.value);if(!isNaN(n))cfg.metaPoupanca=n/100;}else if(t.id==='cAporte'){const n=num(t.value);if(!isNaN(n)){cfg.metaAporte=n;$('#sMon').value=n;}}else if(t.dataset.ci!==undefined){const c=cfg.categorias[+t.dataset.ci],f=t.dataset.f;if(f==='nome'){const old=c.nome,nv=t.value.trim();if(!nv)return;c.nome=nv;txs.filter(x=>x.categoria===old).forEach(x=>{x.categoria=nv;});}else if(f==='limite'){const n=num(t.value);c.limite=t.value.trim()===''||isNaN(n)?null:n;}else c.tipo=t.value;}else if(t.dataset.gi!==undefined){const g=cfg.objetivos[+t.dataset.gi],f=t.dataset.f;if(f==='nome'){if(t.value.trim())g.nome=t.value.trim();}else if(f==='prazo')g.prazo=t.value;else{const n=num(t.value);g[f]=t.value.trim()===''||isNaN(n)?(f==='meta'?null:0):n;}}else return;saveCfg();render();});
   v.addEventListener('click',e=>{if(!currentUser||!currentUser.admin)return;const t=e.target.closest('button');if(!t)return;if(t.dataset.cdel!==undefined){cfg.categorias.splice(+t.dataset.cdel,1);}else if(t.dataset.gdel!==undefined){const g=cfg.objetivos[+t.dataset.gdel];if(txs.some(x=>x.objetivo===g.id)&&!confirm(`"${g.nome}" tem lançamentos. Remover mesmo assim?`))return;cfg.objetivos.splice(+t.dataset.gdel,1);}else if(t.id==='addCat'){cfg.categorias.push({nome:'Nova categoria',limite:null,tipo:'Estilo de vida'});}else if(t.id==='addGoal'){cfg.objetivos.push({id:uid8(),nome:'Novo objetivo',meta:null,prazo:'',inicial:0});}else if(t.id==='exportCsv'){exportCsv();return;}else return;saveCfg();fillSettings();render();});
 }
