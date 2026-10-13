@@ -5,11 +5,11 @@
 
 const CACHE = 'financas-v2';
 const ASSETS = [
-  '/financas/',
-  '/financas/index.html',
-  '/financas/manifest.json',
-  '/financas/icon-192.png',
-  '/financas/icon-512.png'
+  '/minhas-financas/',
+  '/minhas-financas/index.html',
+  '/minhas-financas/manifest.json',
+  '/minhas-financas/icon-192.png',
+  '/minhas-financas/icon-512.png'
 ];
 
 // Instala e faz cache dos arquivos principais
