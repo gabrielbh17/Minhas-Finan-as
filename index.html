@@ -373,6 +373,24 @@ table.heat thead th{color:var(--muted);font-weight:600}table.heat tfoot td{font-
 </div>
 <div class="toast" id="toast" role="status"></div>
 
+<!-- Sheet de confirmação de pagamento -->
+<div class="scrim" id="scrimPay"></div>
+<div class="sheet" id="sheetPay" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+  <h2><span id="payTitle">Confirmar pagamento</span><button class="iconbtn" id="closePay" aria-label="Fechar">✕</button></h2>
+  <p class="hint" id="payHint" style="margin-bottom:16px"></p>
+  <div class="two">
+    <div><label class="lbl" for="payData">Data do pagamento</label><input class="inp" id="payData" type="date"></div>
+    <div><label class="lbl" for="payValor">Valor (R$)</label><input class="inp" id="payValor" inputmode="decimal"></div>
+  </div>
+  <label class="lbl" for="payForma">Forma de pagamento</label>
+  <select class="inp" id="payForma" style="margin-bottom:16px"></select>
+  <div class="err" id="payErr"></div>
+  <div class="foot">
+    <button class="btn" id="payCancel">Cancelar</button>
+    <button class="btn primary" id="payConfirm">Confirmar pagamento</button>
+  </div>
+</div>
+
 <!-- Sheet de recorrência -->
 <div class="scrim" id="scrimRec"></div>
 <div class="sheet" id="sheetRec" role="dialog" aria-modal="true" aria-labelledby="recTitle">
@@ -664,20 +682,36 @@ function renderContas(){
     </div>`).join('') : `<div style="color:var(--muted);font-size:13px;padding:12px 0">Nenhuma recorrência ainda.</div>`;
 }
 
-async function payBill(recId){
-  const {y,m}=ym;
+let FP={recId:null};
+function openPaySheet(recId){
   const r=getRecs().find(x=>x.id===recId); if(!r) return;
-  const k=pagKey(recId,y,m);
-  const venc=new Date(y,m-1,Math.min(r.dia,new Date(y,m,0).getDate()));
-  const dataStr=`${venc.getFullYear()}-${pad(venc.getMonth()+1)}-${pad(venc.getDate())}`;
-  const t={id:uid8(),data:dataStr,tipo:'Despesa',categoria:r.categoria,objetivo:'',descricao:r.nome+(r.obs?' ('+r.obs+')':''),valor:r.valor,forma:r.forma||'',criado:Date.now()};
-  if(!cfg.pagamentos) cfg.pagamentos={};
-  cfg.pagamentos[k]={pago:true,txId:t.id};
-  saveTx(t);
-  saveCfg();
-  renderContas();
-  toast(`✓ ${r.nome} marcado como pago e lançado.`);
+  FP={recId};
+  $('#payTitle').textContent=`Pagar: ${r.nome}`;
+  $('#payHint').textContent=`Valor cadastrado: ${brl.format(r.valor)} · Dia de vencimento: ${r.dia}. Confirme a data e o valor reais do pagamento.`;
+  $('#payData').value=isoToday;
+  $('#payValor').value=String(r.valor).replace('.',',');
+  $('#payForma').innerHTML=cfg.formas.map(f=>`<option${r.forma===f?' selected':''}>${esc(f)}</option>`).join('');
+  $('#payErr').textContent='';
+  $('#scrimPay').classList.add('on');$('#sheetPay').classList.add('on');
+  setTimeout(()=>$('#payValor').focus(),60);
 }
+function closePay(){$('#scrimPay').classList.remove('on');$('#sheetPay').classList.remove('on');}
+function bindPay(){
+  $('#closePay').onclick=closePay;$('#payCancel').onclick=closePay;$('#scrimPay').onclick=closePay;
+  $('#payConfirm').onclick=()=>{
+    const r=getRecs().find(x=>x.id===FP.recId); if(!r) return;
+    const v=num($('#payValor').value),d=$('#payData').value;
+    const err=!(v>0)?'Informe o valor.':!d?'Informe a data.':'';
+    if(err){$('#payErr').textContent=err;return;}
+    const {y,m}=ym; const k=pagKey(FP.recId,y,m);
+    const t={id:uid8(),data:d,tipo:'Despesa',categoria:r.categoria,objetivo:'',descricao:r.nome+(r.obs?' ('+r.obs+')':''),valor:Math.round(v*100)/100,forma:$('#payForma').value,criado:Date.now()};
+    if(!cfg.pagamentos) cfg.pagamentos={};
+    cfg.pagamentos[k]={pago:true,txId:t.id};
+    saveTx(t); saveCfg(); closePay(); renderContas();
+    toast(`✓ ${r.nome} lançado em ${new Date(d+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}.`);
+  };
+}
+async function payBill(recId){ openPaySheet(recId); }
 
 async function unpayBill(recId){
   const {y,m}=ym;
@@ -810,7 +844,7 @@ function init(){
   $('#nextM').onclick=()=>{ym=ym.m===12?{y:ym.y+1,m:1}:{y:ym.y,m:ym.m+1};render();};
   document.body.addEventListener('click',e=>{const b=e.target.closest('[data-edit],[data-open],[data-guardar],[data-sim]');if(!b)return;if(b.dataset.edit){const t=txs.find(x=>x.id===b.dataset.edit);if(t)openSheet({tx:t});}else if(b.hasAttribute('data-open'))openSheet();else if(b.dataset.guardar)openSheet({tipo:'Aporte',objetivo:b.dataset.guardar});else if(b.dataset.sim){const g=cfg.objetivos.find(o=>o.id===b.dataset.sim);const G=goalData(g);if(G.meta)$('#sVal').value=G.meta;$('#sHave').value=Math.max(0,Math.round(G.saldo));renderSim();$('.sim').scrollIntoView({behavior:'smooth'});}});
   ['#sVal','#sHave','#sMon','#sRate'].forEach(s=>$(s).addEventListener('input',renderSim));
-  bindSheet();bindSettings();bindRec();
+  bindSheet();bindSettings();bindRec();bindPay();
 }
 init();
 })();
