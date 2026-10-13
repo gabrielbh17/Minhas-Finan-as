@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Finanças do Gabriel</title>
+<title>Controle Financeiro</title>
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#121A1C">
@@ -40,18 +40,79 @@ html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100svh;padding:24px}
+/* ── LOGIN SCREEN — vibe Solo Leveling ── */
+#loginScreen{
+  display:flex;align-items:center;justify-content:center;min-height:100svh;padding:24px;
+  background:radial-gradient(ellipse at 50% 40%, #0a1628 0%, #050b14 60%, #020508 100%);
+  position:relative;overflow:hidden;
+}
 #loginScreen.hidden{display:none}
-.loginBox{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:36px 32px 32px;width:min(400px,100%)}
-.loginBox .brand{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;margin-bottom:6px}
-.loginBox .sub{color:var(--muted);font-size:14px;margin-bottom:28px}
-.loginBox label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-.loginBox input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:14px;font-size:15px}
-.loginBox input:focus{outline:2px solid var(--blue);border-color:transparent}
-.loginBox .errLogin{color:var(--red);font-size:13px;min-height:18px;margin:-6px 0 10px}
-.loginBox button.submit{width:100%;padding:13px;border:0;background:var(--ink);color:var(--bg);border-radius:12px;font-weight:700;font-size:16px;margin-top:4px}
-.loginBox button.submit:disabled{opacity:.5;cursor:not-allowed}
-.loginBox .syncNote{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6;padding:10px;background:var(--surface2);border-radius:8px}
+/* partículas de fundo decorativas */
+#loginScreen::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(0,120,255,.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(0,80,200,.06) 0%, transparent 50%);
+  pointer-events:none;
+}
+.loginBox{
+  position:relative;z-index:1;
+  background:rgba(10,18,32,.85);
+  border:1px solid rgba(0,150,255,.25);
+  border-radius:16px;
+  padding:40px 32px 32px;
+  width:min(400px,100%);
+  box-shadow:0 0 40px rgba(0,120,255,.15), inset 0 1px 0 rgba(0,150,255,.1);
+  backdrop-filter:blur(12px);
+}
+/* hexágono decorativo no topo */
+.loginBox::before{
+  content:'⬡';position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+  font-size:44px;color:rgba(0,150,255,.5);line-height:1;
+  text-shadow:0 0 20px rgba(0,150,255,.8),0 0 40px rgba(0,100,255,.4);
+}
+.loginBox .sys-tag{
+  text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(0,180,255,.6);margin-bottom:18px;margin-top:4px;
+}
+.loginBox .brand{
+  font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.02em;
+  text-align:center;margin-bottom:4px;
+  background:linear-gradient(135deg,#fff 30%,rgba(0,180,255,.9) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.loginBox .sub{
+  color:rgba(0,180,255,.55);font-size:13px;margin-bottom:28px;text-align:center;
+  letter-spacing:.05em;
+}
+.loginBox label{display:block;font-size:12px;color:rgba(0,180,255,.7);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase}
+.loginBox input{
+  width:100%;padding:12px 14px;
+  border:1px solid rgba(0,150,255,.2);
+  border-radius:8px;
+  background:rgba(0,20,50,.6);
+  color:#e0eeff;
+  margin-bottom:14px;font-size:15px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.loginBox input::placeholder{color:rgba(100,150,200,.4)}
+.loginBox input:focus{outline:none;border-color:rgba(0,180,255,.6);box-shadow:0 0 0 3px rgba(0,120,255,.12)}
+.loginBox .errLogin{color:#f07a8c;font-size:13px;min-height:18px;margin:-6px 0 10px;text-align:center}
+.loginBox button.submit{
+  width:100%;padding:13px;border:0;
+  background:linear-gradient(135deg,#0060d0,#0090ff);
+  color:#fff;border-radius:10px;font-weight:700;font-size:16px;margin-top:4px;
+  letter-spacing:.04em;
+  box-shadow:0 4px 20px rgba(0,120,255,.35);
+  transition:opacity .2s,box-shadow .2s;
+}
+.loginBox button.submit:hover{opacity:.9;box-shadow:0 6px 24px rgba(0,120,255,.5)}
+.loginBox button.submit:disabled{opacity:.4;cursor:not-allowed}
+.loginBox .syncNote{
+  font-size:12px;color:rgba(0,180,255,.5);margin-top:16px;text-align:center;
+  line-height:1.6;padding:10px;
+  background:rgba(0,100,200,.08);border:1px solid rgba(0,150,255,.1);border-radius:8px;
+}
 .syncNote .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:-1px}
 .dot.green{background:var(--green)}.dot.amber{background:var(--amber)}.dot.red{background:var(--red)}
 #app{display:none}#app.on{display:block}
@@ -215,14 +276,15 @@ table.heat thead th{color:var(--muted);font-weight:600}table.heat tfoot td{font-
 
 <div id="loginScreen">
   <div class="loginBox">
-    <div class="brand">Finanças do Gabriel</div>
-    <div class="sub">Acesso restrito · Insira suas credenciais</div>
+    <div class="sys-tag">[ Sistema de Controle — Acesso Restrito ]</div>
+    <div class="brand">Controle Financeiro</div>
+    <div class="sub">Insira suas credenciais para acessar</div>
     <label for="loginUser">Usuário</label>
-    <input id="loginUser" type="text" placeholder="gabriel" autocomplete="username" spellcheck="false">
+    <input id="loginUser" type="text" placeholder="seu usuário" autocomplete="username" spellcheck="false">
     <label for="loginPass">Senha</label>
     <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
     <div class="errLogin" id="loginErr"></div>
-    <button class="submit" id="loginBtn">Entrar</button>
+    <button class="submit" id="loginBtn">Entrar no Sistema</button>
     <div class="syncNote" id="syncNote">
       <span class="dot amber"></span>Verificando conexão com o servidor...
     </div>
@@ -232,7 +294,7 @@ table.heat thead th{color:var(--muted);font-weight:600}table.heat tfoot td{font-
 <div id="app">
 <div class="wrap">
   <header class="top">
-    <div class="brand">Finanças do Gabriel<small id="brandSub">Controle do mês e o caminho até seus objetivos</small></div>
+    <div class="brand" id="appBrand"><small id="brandSub">Controle do mês e o caminho até seus objetivos</small></div>
     <div class="topright">
       <div class="syncBadge" id="syncBadge"><span class="dot amber" id="syncDot"></span><span id="syncTxt">sincronizando</span></div>
       <div class="monthnav" role="group" aria-label="Mês">
@@ -434,12 +496,14 @@ table.heat thead th{color:var(--muted);font-weight:600}table.heat tfoot td{font-
 <script>
 /*
  * ╔══════════════════════════════════════════════════════════╗
- * ║  LISTA DE USUÁRIOS                                       ║
+ * ║  CONFIGURAÇÃO RÁPIDA                                     ║
+ * ║  Mude o nome abaixo: aparece no título e no app.        ║
  * ║  As senhas são armazenadas como hash SHA-256.            ║
  * ║  Para gerar um novo hash: https://emn178.github.io/      ║
  * ║  online-tools/sha256.html                                ║
  * ╚══════════════════════════════════════════════════════════╝
  */
+const APP_OWNER = "Gabriel"; // ← mude aqui para personalizar
 const USUARIOS = [
   {
     usuario: "gabriel",
@@ -580,11 +644,14 @@ async function enterApp(u){
   updateAccessUI();
   $('#status').textContent=`Logado como ${u.nome} · ${url?'Sincronização com Google Sheets ativa':'Dados salvos apenas neste navegador — configure a URL do Apps Script em Ajustes'}`;
   if($('#cfgScriptUrl')) $('#cfgScriptUrl').value=url;
+  // Atualiza o título do app com o nome do dono
+  const brand=$('#appBrand');
+  if(brand){ brand.childNodes[0]&&brand.childNodes[0].nodeType===3?brand.childNodes[0].textContent=`Finanças do ${APP_OWNER}`:brand.insertBefore(document.createTextNode(`Finanças do ${APP_OWNER}`),brand.firstChild); }
 }
 function updateAccessUI(){ const ro=!currentUser||!currentUser.admin;$('#fab').style.display=ro?'none':''; }
 
 /* ── Dados ── */
-const LS='financas-gabriel-v2';
+const LS='financas-v2';
 const DEFAULT_CFG={
   saldoInicial:0,dataBase:'2026-10-01',metaPoupanca:0.2,metaAporte:800,
   categorias:[
@@ -826,7 +893,7 @@ function bindSettings(){
   v.addEventListener('change',e=>{if(!currentUser||!currentUser.admin)return;const t=e.target;if(t.id==='cSaldo'){const n=num(t.value);if(!isNaN(n))cfg.saldoInicial=n;}else if(t.id==='cBase'){if(t.value)cfg.dataBase=t.value;}else if(t.id==='cTaxa'){const n=num(t.value);if(!isNaN(n))cfg.metaPoupanca=n/100;}else if(t.id==='cAporte'){const n=num(t.value);if(!isNaN(n)){cfg.metaAporte=n;$('#sMon').value=n;}}else if(t.dataset.ci!==undefined){const c=cfg.categorias[+t.dataset.ci],f=t.dataset.f;if(f==='nome'){const old=c.nome,nv=t.value.trim();if(!nv)return;c.nome=nv;txs.filter(x=>x.categoria===old).forEach(x=>{x.categoria=nv;});}else if(f==='limite'){const n=num(t.value);c.limite=t.value.trim()===''||isNaN(n)?null:n;}else c.tipo=t.value;}else if(t.dataset.ri!==undefined){const nv=t.value.trim();if(nv) cfg.receitas[+t.dataset.ri]=nv;}else if(t.dataset.fi!==undefined){const nv=t.value.trim();if(nv) cfg.formas[+t.dataset.fi]=nv;}else if(t.dataset.gi!==undefined){const g=cfg.objetivos[+t.dataset.gi],f=t.dataset.f;if(f==='nome'){if(t.value.trim())g.nome=t.value.trim();}else if(f==='prazo')g.prazo=t.value;else{const n=num(t.value);g[f]=t.value.trim()===''||isNaN(n)?(f==='meta'?null:0):n;}}else return;saveCfg();render();});
   v.addEventListener('click',e=>{if(!currentUser||!currentUser.admin)return;const t=e.target.closest('button');if(!t)return;if(t.dataset.cdel!==undefined){cfg.categorias.splice(+t.dataset.cdel,1);}else if(t.dataset.rdel!==undefined){cfg.receitas.splice(+t.dataset.rdel,1);}else if(t.dataset.fdel!==undefined){cfg.formas.splice(+t.dataset.fdel,1);}else if(t.id==='addForma'){cfg.formas.push('Nova forma');}else if(t.dataset.gdel!==undefined){const g=cfg.objetivos[+t.dataset.gdel];if(txs.some(x=>x.objetivo===g.id)&&!confirm(`"${g.nome}" tem lançamentos. Remover mesmo assim?`))return;cfg.objetivos.splice(+t.dataset.gdel,1);}else if(t.id==='addCat'){cfg.categorias.push({nome:'Nova categoria',limite:null,tipo:'Estilo de vida'});}else if(t.id==='addReceita'){cfg.receitas.push('Nova receita');}else if(t.id==='addGoal'){cfg.objetivos.push({id:uid8(),nome:'Novo objetivo',meta:null,prazo:'',inicial:0});}else if(t.id==='exportCsv'){exportCsv();return;}else return;saveCfg();fillSettings();render();});
 }
-function exportCsv(){const head='Data;Tipo;Categoria;Descricao;Valor;Pagamento;Objetivo;Tipo de gasto';const rows=[...txs].sort((a,b)=>a.data.localeCompare(b.data)).map(t=>{const g=cfg.objetivos.find(o=>o.id===t.objetivo);return[t.data,t.tipo,t.categoria||'',(t.descricao||'').replace(/;/g,','),String(t.valor).replace('.',','),t.forma||'',g?g.nome:'',t.tipo==='Despesa'?catTipo(t.categoria):''].join(';');});const csv='\ufeff'+[head,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=`financas-gabriel-${isoToday}.csv`;a.click();toast('Arquivo exportado.');}
+function exportCsv(){const head='Data;Tipo;Categoria;Descricao;Valor;Pagamento;Objetivo;Tipo de gasto';const rows=[...txs].sort((a,b)=>a.data.localeCompare(b.data)).map(t=>{const g=cfg.objetivos.find(o=>o.id===t.objetivo);return[t.data,t.tipo,t.categoria||'',(t.descricao||'').replace(/;/g,','),String(t.valor).replace('.',','),t.forma||'',g?g.nome:'',t.tipo==='Despesa'?catTipo(t.categoria):''].join(';');});const csv='\ufeff'+[head,...rows].join('\n');const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=`financas-${APP_OWNER.toLowerCase()}-${isoToday}.csv`;a.click();toast('Arquivo exportado.');}
 
 /* ── Sheet ── */
 let F={id:null,tipo:'Despesa',categoria:null,objetivo:null},lastDate=isoToday;
