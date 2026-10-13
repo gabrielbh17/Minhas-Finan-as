@@ -583,7 +583,7 @@ const DEFAULT_CFG={
     {nome:'Compras pessoais',limite:null,tipo:'Estilo de vida'},{nome:'Dívidas',limite:null,tipo:'Essencial'},
     {nome:'Veículo',limite:null,tipo:'Essencial'},{nome:'Outros',limite:null,tipo:'Estilo de vida'}],
   receitas:['Salário','13º / Férias','Vale Refeição (VR)','Vale Alimentação (VA)','Renda extra','Rendimentos','Reembolso','Outras receitas'],
-  formas:['Pix','Débito','Crédito','Dinheiro','Boleto','Transferência'],
+  formas:['Pix','Débito','Crédito','Dinheiro','Boleto','Transferência','Vale Refeição (VR)','Vale Alimentação (VA)'],
   objetivos:[
     {id:'reserva',nome:'Reserva de emergência',meta:null,prazo:'',inicial:0},
     {id:'cnh',nome:'CNH B',meta:null,prazo:'',inicial:0},
@@ -781,7 +781,9 @@ function renderAno(){const y=ym.y;$('#yearTitle').textContent='Seu ano de '+y;co
 
 /* ── Ajustes ── */
 function fillSettings(){
-  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#v-cfg'))return;
+  // Não atualiza se o usuário está digitando num campo de Ajustes
+  const ae=document.activeElement;
+  if(ae&&ae.closest&&ae.closest('#v-cfg')&&(ae.tagName==='INPUT')&&ae.value!==''&&document.hasFocus()) return;
   $('#cSaldo').value=String(cfg.saldoInicial).replace('.',',');$('#cBase').value=cfg.dataBase;$('#cTaxa').value=Math.round(cfg.metaPoupanca*100);$('#cAporte').value=String(cfg.metaAporte).replace('.',',');
   $('#catEdit').innerHTML=cfg.categorias.map((c,i)=>`<div class="rowedit"><input class="inp" data-ci="${i}" data-f="nome" value="${esc(c.nome)}" aria-label="Nome"><input class="inp" data-ci="${i}" data-f="limite" value="${c.limite==null?'':String(c.limite).replace('.',',')}" placeholder="Sem limite" inputmode="decimal" aria-label="Limite"><select class="inp" data-ci="${i}" data-f="tipo" aria-label="Tipo"><option${c.tipo==='Essencial'?' selected':''}>Essencial</option><option${c.tipo!=='Essencial'?' selected':''}>Estilo de vida</option></select><button class="iconbtn" data-cdel="${i}" aria-label="Remover">✕</button></div>`).join('');
   $('#receitaEdit').innerHTML=(cfg.receitas||[]).map((r,i)=>`<div class="rowedit" style="grid-template-columns:1fr auto"><input class="inp" data-ri="${i}" value="${esc(r)}" aria-label="Categoria de receita" placeholder="Ex.: Vale Refeição (VR)"><button class="iconbtn" data-rdel="${i}" aria-label="Remover">✕</button></div>`).join('');
