@@ -384,8 +384,9 @@ function setScriptUrl(u){ localStorage.setItem(SCRIPT_URL_KEY,u); scriptUrl=u; }
 async function remoteCall(action,usuario,chave,valor){
   const url=getScriptUrl(); if(!url) return null;
   try{
-    const body=JSON.stringify({action,usuario,chave,valor});
-    const r=await fetch(url,{method:'POST',body,headers:{'Content-Type':'application/json'}});
+    const params=new URLSearchParams({action,usuario,chave});
+    if(valor!==undefined) params.set('valor',encodeURIComponent(String(valor)));
+    const r=await fetch(`${url}?${params}`,{method:'GET',redirect:'follow'});
     const d=await r.json(); return d;
   }catch(e){ return null; }
 }
@@ -433,7 +434,7 @@ async function checkConnection(url){
   if(!url){ syncFeedback('error','URL não configurada. Os dados ficam só neste navegador.'); return false; }
   syncFeedback('amber','Testando conexão...');
   try{
-    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'get',usuario:'__ping__',chave:'__ping__'}),headers:{'Content-Type':'application/json'}});
+    const r=await fetch(`${url}?action=ping`,{method:'GET',redirect:'follow'});
     const d=await r.json();
     if(d&&typeof d.ok!=='undefined'){ syncFeedback('green','✓ Servidor conectado! Dados sincronizam entre dispositivos.'); return true; }
     syncFeedback('error','Resposta inesperada. Verifique a URL.'); return false;
